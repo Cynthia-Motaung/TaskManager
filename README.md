@@ -1,7 +1,7 @@
-🗂️ Task Management System
+🗂️ Task Management API (Backend)
 
-A full-stack Task Management System built with ASP.NET Core Web API (C#) for the backend and React (JavaScript) for the frontend.
-This system allows you to manage projects, tasks, assignments, priorities, dependencies, comments, and attachments.
+A Task Management System API built with ASP.NET Core 8 Web API and Entity Framework Core.
+This backend provides endpoints for managing projects, tasks, users, assignments, dependencies, comments, and attachments.
 
 🚀 Features
 
@@ -9,65 +9,64 @@ Users: Create and manage users
 
 Projects: Organize tasks into projects
 
-Tasks: Assign priorities, dependencies, deadlines
+Tasks: Add deadlines, priorities, and statuses
 
 Assignments: Assign tasks to users
 
-Dependencies: Track relationships between tasks
+Dependencies: Define relationships between tasks
 
-Comments: Add comments on tasks
+Comments: Allow collaboration through comments
 
 Attachments: Upload and manage file attachments
 
 Swagger UI for API documentation and testing
 
-React Frontend with project/task browsing
-
 🛠️ Tech Stack
 
-Backend: ASP.NET Core 8 Web API
+Framework: ASP.NET Core 8 Web API
 
-Database: SQL Server (Entity Framework Core ORM)
+Database: SQL Server (via EF Core ORM)
 
-Frontend: React + Axios
+Migrations: Entity Framework Core
 
-Tools: Swagger, Postman, Visual Studio / VS Code
+Testing: Swagger / Postman
 
 📂 Project Structure
-TaskManagementAPI/        → Backend API (ASP.NET Core)
-  Controllers/            → API Controllers
-  Models/                 → Entity Models
-  Migrations/             → EF Core Migrations
-  appsettings.json        → DB connection strings
-
-task-management-frontend/ → React Frontend
-  src/
-    components/           → React components (ProjectList, TaskList, etc.)
-    api.js                → Axios API service
+TaskManagementAPI/
+ ┣ Controllers/          → API Controllers
+ ┣ Models/               → Entity Models (Users, Tasks, Projects, etc.)
+ ┣ Data/                 → EF Core DbContext
+ ┣ Migrations/           → Database migrations
+ ┣ Program.cs            → Application entrypoint
+ ┣ appsettings.json      → DB connection string & configuration
 
 ⚡ Getting Started
 1️⃣ Clone the Repository
-git clone https://github.com/your-username/task-management-system.git
-cd task-management-system
+git clone https://github.com/your-username/task-management-api.git
+cd task-management-api/TaskManagementAPI
 
-2️⃣ Backend Setup (ASP.NET Core)
-cd TaskManagementAPI
-dotnet restore
-dotnet ef database update   # Run migrations and create DB
-dotnet run                  # Run the API
+2️⃣ Database Setup
+
+Update your appsettings.json with your SQL Server connection string:
+
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Database=TaskManagementDB;User Id=your_user;Password=your_password;TrustServerCertificate=True;"
+}
 
 
-API runs at: https://localhost:5001
+Run migrations and update the database:
+
+dotnet ef database update
+
+3️⃣ Run the API
+dotnet run
+
+
+The API will run at:
+
+API: https://localhost:5001
 
 Swagger UI: https://localhost:5001/swagger
-
-3️⃣ Frontend Setup (React)
-cd task-management-frontend
-npm install
-npm start
-
-
-Frontend runs at: http://localhost:3000
 
 🔗 API Endpoints
 Resource	Endpoint	Methods
@@ -80,23 +79,19 @@ Comments	/api/comments	GET, POST, DELETE
 Attachments	/api/attachments	GET, POST, DELETE
 🧪 Testing
 
-Use Swagger UI to explore API endpoints
+Open Swagger UI: https://localhost:5001/swagger
 
-Use Postman for API testing
-
-Use the React frontend for end-to-end interaction
+Or test endpoints with Postman
 
 🎯 Future Improvements
 
-Authentication & Authorization (JWT)
+✅ JWT Authentication & Authorization
 
-File storage for attachments (Azure Blob / AWS S3)
+✅ File storage integration (Azure Blob / AWS S3)
 
-Notifications & Reminders
+✅ Notification system for deadlines
 
-Kanban board UI
-
-User roles & permissions
+✅ Role-based access (Admin, Manager, User)
 
 📜 License
 
