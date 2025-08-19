@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace TaskManager.Models
 {
@@ -12,8 +14,9 @@ namespace TaskManager.Models
 
         public string Description { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        [JsonIgnore]
         public ICollection<TaskItem> Tasks { get; set; }
     }
 }

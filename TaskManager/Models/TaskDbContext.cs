@@ -55,14 +55,14 @@ namespace TaskManager.Models
             );
 
             modelBuilder.Entity<Project>().HasData(
-                new Project { Id = 1, Name = "Website Redesign", Description = "Redesign corporate website" },
-                new Project { Id = 2, Name = "Mobile App", Description = "Develop new mobile app" }
+                new Project { Id = 1, Name = "Website Redesign", Description = "Redesign corporate website", CreatedAt = new DateTime(2025, 8, 19) },
+                new Project { Id = 2, Name = "Mobile App", Description = "Develop new mobile app" , CreatedAt = new DateTime(2025, 8, 19) }
             );
 
             modelBuilder.Entity<TaskItem>().HasData(
-                new TaskItem { Id = 1, Title = "Design Landing Page", Status = "Pending", Priority = "High", ProjectId = 1 },
-                new TaskItem { Id = 2, Title = "Setup Database", Status = "InProgress", Priority = "Medium", ProjectId = 2 },
-                new TaskItem { Id = 3, Title = "Implement Authentication", Status = "Pending", Priority = "High", ProjectId = 2 }
+                new TaskItem { Id = 1, Title = "Design Landing Page", Status = "Pending", Priority = "High", ProjectId = 1 , Description = "PlaceHolder"},
+                new TaskItem { Id = 2, Title = "Setup Database", Status = "InProgress", Priority = "Medium", ProjectId = 2 , Description = "PlaceHolder" },
+                new TaskItem { Id = 3, Title = "Implement Authentication", Status = "Pending", Priority = "High", ProjectId = 2 , Description = "PlaceHolder" }
             );
 
             modelBuilder.Entity<TaskAssignment>().HasData(

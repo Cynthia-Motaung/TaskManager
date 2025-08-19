@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
 
 namespace TaskManager.Models
 {
@@ -21,8 +24,11 @@ namespace TaskManager.Models
         public int ProjectId { get; set; }
         public Project Project { get; set; }
 
+        [JsonIgnore]
         public ICollection<TaskAssignment> TaskAssignments { get; set; }
+        [JsonIgnore]
         public ICollection<TaskDependency> Dependencies { get; set; } // Tasks this depends on
+        [JsonIgnore]
         public ICollection<TaskDependency> DependedOnBy { get; set; } // Tasks depending on this
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
+﻿
 using System.ComponentModel.DataAnnotations;
-using TaskManager.Models;
+
 
 namespace TaskManager.Models
 {
@@ -19,6 +19,6 @@ namespace TaskManager.Models
         [Required]
         public string FileUrl { get; set; }
 
-        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UploadedAt { get; set; } = DateTime.Now;
     }
 }
