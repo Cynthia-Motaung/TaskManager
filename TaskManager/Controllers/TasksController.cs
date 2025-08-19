@@ -4,96 +4,101 @@ using System;
 using TaskManager.Models;
 
 
-[ApiController]
-[Route("api/[controller]")]
-public class TasksController : ControllerBase
+namespace TaskManager.Controllers
 {
-    private readonly TaskDbContext _context;
-    public TasksController(TaskDbContext context) => _context = context;
-
-    [HttpGet]
-    public async Task<IActionResult> GetTasks() =>
-        Ok(await _context.Tasks
-            .Include(t => t.TaskAssignments)
-            .Include(t => t.Dependencies)
-            .ToListAsync());
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetTask(int id)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TasksController : ControllerBase
     {
-        var task = await _context.Tasks
-            .Include(t => t.TaskAssignments)
-            .Include(t => t.Dependencies)
-            .FirstOrDefaultAsync(t => t.Id == id);
+        private readonly TaskDbContext _context;
+        public TasksController(TaskDbContext context) => _context = context;
 
-        return task == null ? NotFound() : Ok(task);
-    }
+        [HttpGet]
+        public async Task<IActionResult> GetTasks() =>
+            Ok(await _context.Tasks
+                .Include(t => t.TaskAssignments)
+                .Include(t => t.Dependencies)
+                .ToListAsync());
 
-    [HttpPost]
-    public async Task<IActionResult> CreateTask(TaskItem task)
-    {
-        _context.Tasks.Add(task);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
-    }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTask(int id)
+        {
+            var task = await _context.Tasks
+                .Include(t => t.TaskAssignments)
+                .Include(t => t.Dependencies)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateTask(int id, TaskItem task)
-    {
-        if (id != task.Id) return BadRequest();
-        _context.Entry(task).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
+            return task == null ? NotFound() : Ok(task);
+        }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTask(int id)
-    {
-        var task = await _context.Tasks.FindAsync(id);
-        if (task == null) return NotFound();
-        _context.Tasks.Remove(task);
-        await _context.SaveChangesAsync();
-        return NoContent();
-    }
+        [HttpPost]
+        public async Task<IActionResult> CreateTask(TaskItem task)
+        {
+            _context.Tasks.Add(task);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
+        }
 
-    [HttpPost("{id}/assign/{userId}")]
-    public async Task<IActionResult> AssignUser(int id, int userId)
-    {
-        var task = await _context.Tasks.FindAsync(id);
-        var user = await _context.Users.FindAsync(userId);
-        if (task == null || user == null) return NotFound();
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, TaskItem task)
+        {
+            if (id != task.Id) return BadRequest();
+            _context.Entry(task).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
-        _context.TaskAssignments.Add(new TaskAssignment { TaskItemId = id, UserId = userId });
-        await _context.SaveChangesAsync();
-        return Ok();
-    }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null) return NotFound();
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
-    [HttpGet("filter")]
-    public async Task<IActionResult> FilterTasks(
-    [FromQuery] string status,
-    [FromQuery] string priority,
-    [FromQuery] int? projectId,
-    [FromQuery] int? userId)
-    {
-        var query = _context.Tasks
-            .Include(t => t.TaskAssignments)
-            .ThenInclude(ta => ta.User)
-            .AsQueryable();
+        [HttpPost("{id}/assign/{userId}")]
+        public async Task<IActionResult> AssignUser(int id, int userId)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            var user = await _context.Users.FindAsync(userId);
+            if (task == null || user == null) return NotFound();
 
-        if (!string.IsNullOrEmpty(status))
-            query = query.Where(t => t.Status == status);
+            _context.TaskAssignments.Add(new TaskAssignment { TaskItemId = id, UserId = userId });
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
 
-        if (!string.IsNullOrEmpty(priority))
-            query = query.Where(t => t.Priority == priority);
+        [HttpGet("filter")]
+        public async Task<IActionResult> FilterTasks(
+        [FromQuery] string status,
+        [FromQuery] string priority,
+        [FromQuery] int? projectId,
+        [FromQuery] int? userId)
+        {
+            var query = _context.Tasks
+                .Include(t => t.TaskAssignments)
+                .ThenInclude(ta => ta.User)
+                .AsQueryable();
 
-        if (projectId.HasValue)
-            query = query.Where(t => t.ProjectId == projectId);
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(t => t.Status == status);
 
-        if (userId.HasValue)
-            query = query.Where(t => t.TaskAssignments.Any(ta => ta.UserId == userId));
+            if (!string.IsNullOrEmpty(priority))
+                query = query.Where(t => t.Priority == priority);
 
-        var tasks = await query.ToListAsync();
-        return Ok(tasks);
+            if (projectId.HasValue)
+                query = query.Where(t => t.ProjectId == projectId);
+
+            if (userId.HasValue)
+                query = query.Where(t => t.TaskAssignments.Any(ta => ta.UserId == userId));
+
+            var tasks = await query.ToListAsync();
+            return Ok(tasks);
+        }
+
     }
 
 }
+

@@ -12,6 +12,9 @@ namespace TaskManager.Models
         public DbSet<TaskItem> Tasks { get; set; }
         public DbSet<TaskAssignment> TaskAssignments { get; set; }
         public DbSet<TaskDependency> TaskDependencies { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
