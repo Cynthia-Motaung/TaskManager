@@ -47,6 +47,31 @@ namespace TaskManager.Models
                 .WithMany(t => t.DependedOnBy)
                 .HasForeignKey(td => td.DependsOnTaskId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>().HasData(
+                new User { Id = 1, Name = "Alice Johnson", Email = "alice@example.com" },
+                new User { Id = 2, Name = "Bob Smith", Email = "bob@example.com" },
+                new User { Id = 3, Name = "Charlie Lee", Email = "charlie@example.com" }
+            );
+
+            modelBuilder.Entity<Project>().HasData(
+                new Project { Id = 1, Name = "Website Redesign", Description = "Redesign corporate website" },
+                new Project { Id = 2, Name = "Mobile App", Description = "Develop new mobile app" }
+            );
+
+            modelBuilder.Entity<TaskItem>().HasData(
+                new TaskItem { Id = 1, Title = "Design Landing Page", Status = "Pending", Priority = "High", ProjectId = 1 },
+                new TaskItem { Id = 2, Title = "Setup Database", Status = "InProgress", Priority = "Medium", ProjectId = 2 },
+                new TaskItem { Id = 3, Title = "Implement Authentication", Status = "Pending", Priority = "High", ProjectId = 2 }
+            );
+
+            modelBuilder.Entity<TaskAssignment>().HasData(
+                new TaskAssignment { TaskItemId = 1, UserId = 1 },
+                new TaskAssignment { TaskItemId = 2, UserId = 2 },
+                new TaskAssignment { TaskItemId = 3, UserId = 3 }
+            );
+
+
         }
     }
 }

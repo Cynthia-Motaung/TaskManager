@@ -1,0 +1,121 @@
+{
+  "info": {
+    "name": "Task Management API",
+    "_postman_id": "12345-task-api",
+    "description": "Test all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Projects",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:5001/api/projects",
+          "protocol": "https",
+          "host": [ "localhost" ],
+          "port": "5001",
+          "path": [ "api", "projects" ]
+        }
+      }
+    },
+    {
+      "name": "Get All Tasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:5001/api/tasks",
+          "protocol": "https",
+          "host": [ "localhost" ],
+          "port": "5001",
+          "path": [ "api", "tasks" ]
+        }
+      }
+    },
+    {
+      "name": "Create Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Write API Documentation\",\n    \"description\": \"Document all endpoints\",\n    \"status\": \"Pending\",\n    \"priority\": \"Medium\",\n    \"projectId\": 1\n}"
+        },
+        "url": {
+          "raw": "https://localhost:5001/api/tasks",
+          "protocol": "https",
+          "host": [ "localhost" ],
+          "port": "5001",
+          "path": [ "api", "tasks" ]
+        }
+      }
+    },
+    {
+      "name": "Assign User to Task",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "https://localhost:5001/api/tasks/1/assign/2",
+          "protocol": "https",
+          "host": [ "localhost" ],
+          "port": "5001",
+          "path": [ "api", "tasks", "1", "assign", "2" ]
+        }
+      }
+    },
+    {
+      "name": "Add Comment to Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"userId\": 1,\n    \"content\": \"This task should be done by Friday.\"\n}"
+        },
+        "url": {
+          "raw": "https://localhost:5001/api/tasks/1/comments",
+          "protocol": "https",
+          "host": [ "localhost" ],
+          "port": "5001",
+          "path": [ "api", "tasks", "1", "comments" ]
+        }
+      }
+    },
+    {
+      "name": "Add Attachment to Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fileName\": \"Wireframe.png\",\n    \"fileUrl\": \"https://example.com/wireframe.png\"\n}"
+        },
+        "url": {
+          "raw": "https://localhost:5001/api/tasks/1/attachments",
+          "protocol": "https",
+          "host": [ "localhost" ],
+          "port": "5001",
+          "path": [ "api", "tasks", "1", "attachments" ]
+        }
+      }
+    }
+  ]
+}
