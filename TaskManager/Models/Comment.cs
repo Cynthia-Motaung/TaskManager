@@ -11,14 +11,14 @@ namespace TaskManager.Models
 
         [Required]
         public int TaskItemId { get; set; }
-        public TaskItem TaskItem { get; set; }
+        public TaskItem? TaskItem { get; set; }
 
         [Required]
         public int UserId { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
 
         [Required]
-        public string Content { get; set; }
+        public string? Content { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

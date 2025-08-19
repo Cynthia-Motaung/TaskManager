@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using System;
 using TaskManager.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,11 +8,13 @@ builder.Services.AddDbContext<TaskDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TaskConnection")));
 builder.Services.AddControllers();
 
-//Add Swagger/OpenAPI support
+//Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add OpenAPI support
 builder.Services.AddOpenApi();
+
 
 var app = builder.Build();
 

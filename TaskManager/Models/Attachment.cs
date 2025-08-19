@@ -1,7 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 
-
 namespace TaskManager.Models
 {
     public class Attachment
@@ -11,13 +10,13 @@ namespace TaskManager.Models
 
         [Required]
         public int TaskItemId { get; set; }
-        public TaskItem TaskItem { get; set; }
+        public TaskItem? TaskItem { get; set; }
 
         [Required]
-        public string FileName { get; set; }
+        public string? FileName { get; set; }
 
         [Required]
-        public string FileUrl { get; set; }
+        public string? FileUrl { get; set; }
 
         public DateTime UploadedAt { get; set; } = DateTime.Now;
     }

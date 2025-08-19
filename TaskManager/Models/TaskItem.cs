@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 
@@ -11,9 +10,9 @@ namespace TaskManager.Models
         public int Id { get; set; }
 
         [Required]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
-        public string Description { get; set; }
+        public string?  Description { get; set; }
 
         public string Status { get; set; } = "Pending"; // Pending, InProgress, Done, Blocked
 
@@ -22,13 +21,13 @@ namespace TaskManager.Models
         public DateTime? DueDate { get; set; }
 
         public int ProjectId { get; set; }
-        public Project Project { get; set; }
+        public Project? Project { get; set; }
 
         [JsonIgnore]
-        public ICollection<TaskAssignment> TaskAssignments { get; set; }
+        public ICollection<TaskAssignment>? TaskAssignments { get; set; }
         [JsonIgnore]
-        public ICollection<TaskDependency> Dependencies { get; set; } // Tasks this depends on
+        public ICollection<TaskDependency>? Dependencies { get; set; } // Tasks this depends on
         [JsonIgnore]
-        public ICollection<TaskDependency> DependedOnBy { get; set; } // Tasks depending on this
+        public ICollection<TaskDependency>? DependedOnBy { get; set; } // Tasks depending on this
     }
 }

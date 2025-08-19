@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TaskManager.Models;
 
 namespace TaskManager.Models
 {
@@ -48,23 +47,27 @@ namespace TaskManager.Models
                 .HasForeignKey(td => td.DependsOnTaskId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //Seed initial data for Users
             modelBuilder.Entity<User>().HasData(
                 new User { Id = 1, Name = "Alice Johnson", Email = "alice@example.com" },
                 new User { Id = 2, Name = "Bob Smith", Email = "bob@example.com" },
                 new User { Id = 3, Name = "Charlie Lee", Email = "charlie@example.com" }
             );
 
+            //Seed initial data  for Projects
             modelBuilder.Entity<Project>().HasData(
                 new Project { Id = 1, Name = "Website Redesign", Description = "Redesign corporate website", CreatedAt = new DateTime(2025, 8, 19) },
                 new Project { Id = 2, Name = "Mobile App", Description = "Develop new mobile app" , CreatedAt = new DateTime(2025, 8, 19) }
             );
 
+            //Seed initial data  for Tasks
             modelBuilder.Entity<TaskItem>().HasData(
                 new TaskItem { Id = 1, Title = "Design Landing Page", Status = "Pending", Priority = "High", ProjectId = 1 , Description = "PlaceHolder"},
                 new TaskItem { Id = 2, Title = "Setup Database", Status = "InProgress", Priority = "Medium", ProjectId = 2 , Description = "PlaceHolder" },
                 new TaskItem { Id = 3, Title = "Implement Authentication", Status = "Pending", Priority = "High", ProjectId = 2 , Description = "PlaceHolder" }
             );
 
+            //Seed initial data  for Assignments
             modelBuilder.Entity<TaskAssignment>().HasData(
                 new TaskAssignment { TaskItemId = 1, UserId = 1 },
                 new TaskAssignment { TaskItemId = 2, UserId = 2 },
