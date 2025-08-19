@@ -47,7 +47,7 @@ TaskManagementAPI/
 
 ⚡ Getting Started
 1️⃣ Clone the Repository
-git clone https://github.com/your-username/task-management-api.git
+git clone https://github.comCynthia-Motaung/TaskManager.git
 cd task-management-api/TaskManagementAPI
 
 2️⃣ Database Setup
@@ -82,6 +82,7 @@ Assignments	/api/taskassignments	GET, POST, DELETE
 Dependencies	/api/taskdependencies	GET, POST, DELETE
 Comments	/api/comments	GET, POST, DELETE
 Attachments	/api/attachments	GET, POST, DELETE
+
 🧪 Testing
 
 Open Swagger UI: https://localhost:5001/swagger
