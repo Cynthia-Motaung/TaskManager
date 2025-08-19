@@ -34,10 +34,15 @@ Testing: Swagger / Postman
 📂 Project Structure
 TaskManagementAPI/
  ┣ Controllers/          → API Controllers
+ 
  ┣ Models/               → Entity Models (Users, Tasks, Projects, etc.)
+ 
  ┣ Data/                 → EF Core DbContext
+ 
  ┣ Migrations/           → Database migrations
+ 
  ┣ Program.cs            → Application entrypoint
+ 
  ┣ appsettings.json      → DB connection string & configuration
 
 ⚡ Getting Started
