@@ -28,6 +28,17 @@ namespace TaskManager.Controllers
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetAttachments), new { taskId = taskId }, attachment);
         }
+
+        [HttpDelete("{attachmentId}")]
+        public async Task<IActionResult> DeleteAttachment(int taskId, int attachmentId)
+        {
+            var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.Id == attachmentId && a.TaskItemId == taskId);
+            if (attachment == null) return NotFound();
+
+            _context.Attachments.Remove(attachment);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
 

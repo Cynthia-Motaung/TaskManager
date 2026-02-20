@@ -30,6 +30,17 @@ using TaskManager.Models;
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetComments), new { taskId = taskId }, comment);
         }
+
+        [HttpDelete("{commentId}")]
+        public async Task<IActionResult> DeleteComment(int taskId, int commentId)
+        {
+            var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == commentId && c.TaskItemId == taskId);
+            if (comment == null) return NotFound();
+
+            _context.Comments.Remove(comment);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
 
