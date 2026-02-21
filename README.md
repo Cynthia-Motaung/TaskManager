@@ -1,104 +1,149 @@
-🗂️ Task Management API (Backend)
+# TaskManager API
 
-A Task Management System API built with ASP.NET Core 8 Web API and Entity Framework Core.
-This backend provides endpoints for managing projects, tasks, users, assignments, dependencies, comments, and attachments.
+TaskManager is an ASP.NET Core Web API for managing users, projects, tasks, assignments, dependencies, comments, and attachments.
 
-🚀 Features
+## Tech stack
 
-Users: Create and manage users
+- .NET 10 (`net10.0`)
+- ASP.NET Core Web API
+- Entity Framework Core
+- SQL Server (runtime)
+- InMemory EF provider (integration tests)
+- Swagger / OpenAPI
+- xUnit integration tests
 
-Projects: Organize tasks into projects
+## Project structure
 
-Tasks: Add deadlines, priorities, and statuses
+```text
+TaskManager.sln
+TaskManager/
+  Controllers/
+  DTOs/
+  Mappings/
+  Middleware/
+  Migrations/
+  Models/
+  Program.cs
+TaskManager.Tests/
+```
 
-Assignments: Assign tasks to users
+## Prerequisites
 
-Dependencies: Define relationships between tasks
+- .NET 10 SDK
+- SQL Server instance for normal app runtime
 
-Comments: Allow collaboration through comments
+## Configuration
 
-Attachments: Upload and manage file attachments
+Set your SQL Server connection string in `TaskManager/appsettings.json`:
 
-Swagger UI for API documentation and testing
-
-🛠️ Tech Stack
-
-Framework: ASP.NET Core 8 Web API
-
-Database: SQL Server (via EF Core ORM)
-
-Migrations: Entity Framework Core
-
-Testing: Swagger / Postman
-
-📂 Project Structure
-TaskManagementAPI/
- ┣ Controllers/          → API Controllers
- 
- ┣ Models/               → Entity Models (Users, Tasks, Projects, etc.)
- 
- ┣ Data/                 → EF Core DbContext
- 
- ┣ Migrations/           → Database migrations
- 
- ┣ Program.cs            → Application entrypoint
- 
- ┣ appsettings.json      → DB connection string & configuration
-
-⚡ Getting Started
-1️⃣ Clone the Repository
-git clone https://github.comCynthia-Motaung/TaskManager.git
-cd task-management-api/TaskManagementAPI
-
-2️⃣ Database Setup
-
-Update your appsettings.json with your SQL Server connection string:
-
+```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=TaskManagementDB;User Id=your_user;Password=your_password;TrustServerCertificate=True;"
+  "TaskConnection": "Server=YOUR_SERVER;Database=TaskManager;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"
 }
+```
 
+## Run locally
 
-Run migrations and update the database:
+From repository root:
 
-dotnet ef database update
+```bash
+dotnet restore
+dotnet build
+dotnet run --project TaskManager/TaskManager.csproj
+```
 
-3️⃣ Run the API
-dotnet run
+Default local URLs:
 
+- `http://localhost:5131`
+- `https://localhost:7024`
 
-The API will run at:
+Root URL redirects to Swagger:
 
-API: https://localhost:5001
+- `http://localhost:5131/` -> `/swagger`
+- `http://localhost:5131/swagger/index.html`
 
-Swagger UI: https://localhost:5001/swagger
+## API endpoints
 
-🔗 API Endpoints
-Resource	Endpoint	Methods
-Users	/api/users	GET, POST, PUT, DELETE
-Projects	/api/projects	GET, POST, PUT, DELETE
-Tasks	/api/tasks	GET, POST, PUT, DELETE
-Assignments	/api/taskassignments	GET, POST, DELETE
-Dependencies	/api/taskdependencies	GET, POST, DELETE
-Comments	/api/comments	GET, POST, DELETE
-Attachments	/api/attachments	GET, POST, DELETE
+### Users
 
-🧪 Testing
+- `GET /api/users`
+- `GET /api/users/{id}`
+- `POST /api/users`
+- `PUT /api/users/{id}`
+- `DELETE /api/users/{id}`
 
-Open Swagger UI: https://localhost:5001/swagger
+### Projects
 
-Or test endpoints with Postman
+- `GET /api/projects`
+- `GET /api/projects/{id}`
+- `POST /api/projects`
+- `PUT /api/projects/{id}`
+- `DELETE /api/projects/{id}`
 
-🎯 Future Improvements
+### Tasks
 
-✅ JWT Authentication & Authorization
+- `GET /api/tasks`
+- `GET /api/tasks/{id}`
+- `POST /api/tasks`
+- `PUT /api/tasks/{id}`
+- `DELETE /api/tasks/{id}`
+- `POST /api/tasks/{id}/assign/{userId}`
+- `GET /api/tasks/filter?status=&priority=&projectId=&userId=`
 
-✅ File storage integration (Azure Blob / AWS S3)
+### Task assignments
 
-✅ Notification system for deadlines
+- `GET /api/taskassignments`
+- `GET /api/taskassignments/task/{taskId}`
+- `GET /api/taskassignments/user/{userId}`
+- `POST /api/taskassignments`
+- `DELETE /api/taskassignments/{userId}/{taskId}`
 
-✅ Role-based access (Admin, Manager, User)
+### Task dependencies
 
-📜 License
+- `GET /api/taskdependencies`
+- `GET /api/taskdependencies/{taskId}/{dependsOnTaskId}`
+- `POST /api/taskdependencies`
+- `DELETE /api/taskdependencies/{taskId}/{dependsOnTaskId}`
 
-This project is licensed under the MIT License.
+### Comments (nested under task)
+
+- `GET /api/tasks/{taskId}/comments`
+- `POST /api/tasks/{taskId}/comments`
+- `DELETE /api/tasks/{taskId}/comments/{commentId}`
+
+### Attachments (nested under task)
+
+- `GET /api/tasks/{taskId}/attachments`
+- `POST /api/tasks/{taskId}/attachments`
+- `DELETE /api/tasks/{taskId}/attachments/{attachmentId}`
+
+## Validation and error handling
+
+- Request payloads use DTOs with data annotations.
+- Task `status` allowed values: `Pending`, `InProgress`, `Done`, `Blocked`.
+- Task `priority` allowed values: `Low`, `Medium`, `High`, `Critical`.
+- Global exception middleware returns `application/problem+json` for unhandled errors.
+
+## Database migrations
+
+Apply migrations:
+
+```bash
+dotnet ef database update --project TaskManager/TaskManager.csproj
+```
+
+## Automated tests
+
+Integration tests use `WebApplicationFactory` with an in-memory EF database in `Testing` environment.
+
+Run tests:
+
+```bash
+dotnet test TaskManager.Tests/TaskManager.Tests.csproj
+```
+
+Current integration coverage includes:
+
+- Root redirect to Swagger
+- Task validation scenarios
+- Full API workflow smoke test across all controllers and key endpoints

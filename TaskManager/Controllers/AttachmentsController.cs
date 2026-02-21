@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TaskManager.DTOs;
+using TaskManager.Mappings;
 using TaskManager.Models;
 
 namespace TaskManager.Controllers
@@ -15,18 +17,29 @@ namespace TaskManager.Controllers
         public async Task<IActionResult> GetAttachments(int taskId)
         {
             var attachments = await _context.Attachments
+                .AsNoTracking()
                 .Where(a => a.TaskItemId == taskId)
                 .ToListAsync();
-            return Ok(attachments);
+            return Ok(attachments.Select(a => a.ToAttachmentDto()));
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddAttachment(int taskId, Attachment attachment)
+        public async Task<IActionResult> AddAttachment(int taskId, AttachmentCreateDto attachmentDto)
         {
-            attachment.TaskItemId = taskId;
+            var taskExists = await _context.Tasks.AnyAsync(t => t.Id == taskId);
+            if (!taskExists) return NotFound("Task not found.");
+
+            var attachment = new Attachment
+            {
+                TaskItemId = taskId,
+                FileName = attachmentDto.FileName.Trim(),
+                FileUrl = attachmentDto.FileUrl.Trim(),
+                UploadedAt = DateTime.UtcNow
+            };
+
             _context.Attachments.Add(attachment);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetAttachments), new { taskId = taskId }, attachment);
+            return CreatedAtAction(nameof(GetAttachments), new { taskId = taskId }, attachment.ToAttachmentDto());
         }
 
         [HttpDelete("{attachmentId}")]
@@ -41,5 +54,4 @@ namespace TaskManager.Controllers
         }
     }
 }
-
 

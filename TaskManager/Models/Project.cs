@@ -17,6 +17,6 @@ namespace TaskManager.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [JsonIgnore]
-        public ICollection<TaskItem>? Tasks { get; set; }
+        public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TaskManager.DTOs;
+using TaskManager.Mappings;
 using TaskManager.Models;
 
 namespace TaskManager.Controllers
@@ -12,36 +14,49 @@ namespace TaskManager.Controllers
         public ProjectsController(TaskDbContext context) => _context = context;
 
         [HttpGet]
-        public async Task<IActionResult> GetProjects() =>
-            Ok(await _context.Projects
-                .Include(p => p.Tasks)
-                .ThenInclude(t => t.TaskAssignments)
-                .ToListAsync());
+        public async Task<IActionResult> GetProjects()
+        {
+            var projects = await _context.Projects
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(projects.Select(p => p.ToProjectDto()));
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProject(int id)
         {
             var project = await _context.Projects
+                .AsNoTracking()
                 .Include(p => p.Tasks)
-                .ThenInclude(t => t.TaskAssignments)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
-            return project == null ? NotFound() : Ok(project);
+            return project == null ? NotFound() : Ok(project.ToProjectDetailsDto());
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProject(Project project)
+        public async Task<IActionResult> CreateProject(ProjectCreateDto projectDto)
         {
+            var project = new Project
+            {
+                Name = projectDto.Name.Trim(),
+                Description = projectDto.Description?.Trim(),
+                CreatedAt = DateTime.UtcNow
+            };
+
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
+            return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project.ToProjectDto());
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProject(int id, Project project)
+        public async Task<IActionResult> UpdateProject(int id, ProjectUpdateDto projectDto)
         {
-            if (id != project.Id) return BadRequest();
-            _context.Entry(project).State = EntityState.Modified;
+            var existingProject = await _context.Projects.FindAsync(id);
+            if (existingProject == null) return NotFound();
+
+            existingProject.Name = projectDto.Name.Trim();
+            existingProject.Description = projectDto.Description?.Trim();
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -57,5 +72,4 @@ namespace TaskManager.Controllers
         }
     }
 }
-
 

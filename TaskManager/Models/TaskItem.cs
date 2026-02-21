@@ -24,10 +24,10 @@ namespace TaskManager.Models
         public Project? Project { get; set; }
 
         [JsonIgnore]
-        public ICollection<TaskAssignment>? TaskAssignments { get; set; }
+        public ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
         [JsonIgnore]
-        public ICollection<TaskDependency>? Dependencies { get; set; } // Tasks this depends on
+        public ICollection<TaskDependency> Dependencies { get; set; } = new List<TaskDependency>(); // Tasks this depends on
         [JsonIgnore]
-        public ICollection<TaskDependency>? DependedOnBy { get; set; } // Tasks depending on this
+        public ICollection<TaskDependency> DependedOnBy { get; set; } = new List<TaskDependency>(); // Tasks depending on this
     }
 }

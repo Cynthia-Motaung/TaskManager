@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TaskManager.DTOs;
+using TaskManager.Mappings;
 using TaskManager.Models;
 
 namespace TaskManager.Controllers
@@ -12,33 +14,63 @@ namespace TaskManager.Controllers
         public UsersController(TaskDbContext context) => _context = context;
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers() =>
-            Ok(await _context.Users.ToListAsync());
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _context.Users
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(users.Select(u => u.ToUserDto()));
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _context.Users
+                .AsNoTracking()
                 .Include(u => u.TaskAssignments)
                 .ThenInclude(ta => ta.TaskItem)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
-            return user == null ? NotFound() : Ok(user);
+            return user == null ? NotFound() : Ok(user.ToUserDetailsDto());
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(User user)
+        public async Task<IActionResult> CreateUser(UserCreateDto userDto)
         {
+            var emailInUse = await _context.Users.AnyAsync(u => u.Email == userDto.Email);
+            if (emailInUse)
+            {
+                ModelState.AddModelError(nameof(userDto.Email), "Email is already in use.");
+                return ValidationProblem(ModelState);
+            }
+
+            var user = new User
+            {
+                Name = userDto.Name.Trim(),
+                Email = userDto.Email.Trim()
+            };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user.ToUserDto());
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, User user)
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateDto userDto)
         {
-            if (id != user.Id) return BadRequest();
-            _context.Entry(user).State = EntityState.Modified;
+            var existingUser = await _context.Users.FindAsync(id);
+            if (existingUser == null) return NotFound();
+
+            var emailInUse = await _context.Users.AnyAsync(u => u.Email == userDto.Email && u.Id != id);
+            if (emailInUse)
+            {
+                ModelState.AddModelError(nameof(userDto.Email), "Email is already in use.");
+                return ValidationProblem(ModelState);
+            }
+
+            existingUser.Name = userDto.Name.Trim();
+            existingUser.Email = userDto.Email.Trim();
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -55,4 +87,3 @@ namespace TaskManager.Controllers
     }
 
 }
-
