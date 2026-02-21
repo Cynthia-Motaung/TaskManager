@@ -7,8 +7,8 @@ TaskManager is an ASP.NET Core Web API for managing users, projects, tasks, assi
 - .NET 10 (`net10.0`)
 - ASP.NET Core Web API
 - Entity Framework Core
-- SQL Server (runtime)
-- InMemory EF provider (integration tests)
+- SQL Server (persistent runtime data)
+- InMemory EF provider (integration tests or temporary local mode)
 - Swagger / OpenAPI
 - xUnit integration tests
 
@@ -25,42 +25,47 @@ TaskManager/
   Models/
   Program.cs
 TaskManager.Tests/
+docker-compose.yml
 ```
 
 ## Prerequisites
 
 - .NET 10 SDK
-- SQL Server instance for normal app runtime
+- SQL Server instance
+  - easiest local option: Docker Desktop + `docker compose`
 
-## Configuration
-
-Set your SQL Server connection string in `TaskManager/appsettings.json`:
-
-```json
-"ConnectionStrings": {
-  "TaskConnection": "Server=YOUR_SERVER;Database=TaskManager;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"
-}
-```
-
-## Run locally
+## Persistent SQL setup (recommended)
 
 From repository root:
 
 ```bash
+docker compose up -d
 dotnet restore
 dotnet build
+dotnet ef database update --project TaskManager/TaskManager.csproj
 dotnet run --project TaskManager/TaskManager.csproj
 ```
 
-Default local URLs:
+This repo is configured to use SQL Server in Development:
+
+- `TaskManager/appsettings.Development.json` sets `"UseInMemoryDatabase": false`
+- Connection string targets `localhost,14333`
+
+## Temporary in-memory mode (non-persistent)
+
+For quick runs without SQL Server:
+
+```bash
+UseInMemoryDatabase=true dotnet run --project TaskManager/TaskManager.csproj
+```
+
+Data is reset when the process stops.
+
+## Local URLs
 
 - `http://localhost:5131`
 - `https://localhost:7024`
-
-Root URL redirects to Swagger:
-
-- `http://localhost:5131/` -> `/swagger`
-- `http://localhost:5131/swagger/index.html`
+- Root redirects to Swagger: `http://localhost:5131/` -> `/swagger`
 
 ## API endpoints
 
@@ -117,33 +122,19 @@ Root URL redirects to Swagger:
 - `POST /api/tasks/{taskId}/attachments`
 - `DELETE /api/tasks/{taskId}/attachments/{attachmentId}`
 
-## Validation and error handling
+## Validation and errors
 
-- Request payloads use DTOs with data annotations.
-- Task `status` allowed values: `Pending`, `InProgress`, `Done`, `Blocked`.
-- Task `priority` allowed values: `Low`, `Medium`, `High`, `Critical`.
-- Global exception middleware returns `application/problem+json` for unhandled errors.
+- DTO-based request/response contracts
+- Task status allowed: `Pending`, `InProgress`, `Done`, `Blocked`
+- Task priority allowed: `Low`, `Medium`, `High`, `Critical`
+- Global exception middleware returns `application/problem+json`
 
-## Database migrations
+## Tests
 
-Apply migrations:
-
-```bash
-dotnet ef database update --project TaskManager/TaskManager.csproj
-```
-
-## Automated tests
-
-Integration tests use `WebApplicationFactory` with an in-memory EF database in `Testing` environment.
-
-Run tests:
+Run integration tests:
 
 ```bash
 dotnet test TaskManager.Tests/TaskManager.Tests.csproj
 ```
 
-Current integration coverage includes:
-
-- Root redirect to Swagger
-- Task validation scenarios
-- Full API workflow smoke test across all controllers and key endpoints
+Current integration coverage includes a full workflow smoke test across all controllers and key endpoints.
