@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: taskmanager-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+        value: "true"
+      - key: UseInMemoryDatabase
+        value: "false"
+      - key: Jwt__Issuer
+        value: TaskManager
+      - key: Jwt__Audience
+        value: TaskManagerClients
+      - key: Jwt__ExpiryMinutes
+        value: "120"
+      - key: SeedUsers__Enabled
+        value: "false"
+      - key: TASKMANAGER_JWT_KEY
+        sync: false
+      - key: ConnectionStrings__TaskConnection
+        sync: false

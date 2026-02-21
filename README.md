@@ -26,6 +26,11 @@ TaskManager/
   Program.cs
 TaskManager.Tests/
 docker-compose.yml
+DEPLOYMENT.md
+.env.production.example
+.env.render.example
+render.yaml
+Dockerfile
 ```
 
 ## Prerequisites
@@ -34,16 +39,40 @@ docker-compose.yml
 - SQL Server instance
   - easiest local option: Docker Desktop + `docker compose`
 
+## Production readiness
+
+Use `DEPLOYMENT.md` as the source of truth for production rollout.
+
+Minimum production requirements:
+
+- `ASPNETCORE_ENVIRONMENT=Production`
+- `UseInMemoryDatabase=false`
+- `ConnectionStrings__TaskConnection` set from secret store
+- `TASKMANAGER_JWT_KEY` set from secret store (32+ chars)
+- `SeedUsers__Enabled=false` after initial bootstrap
+- Start from `.env.production.example` when preparing production host env values
+- For Render, start from `.env.render.example` and deploy using `render.yaml`
+
+Render quick start:
+
+1. Push repo with `render.yaml`.
+2. Create a Blueprint service on Render.
+3. Set `TASKMANAGER_JWT_KEY` and `ConnectionStrings__TaskConnection` in Render env settings.
+
 ## Persistent SQL setup (recommended)
 
 From repository root:
 
 ```bash
-export TASKMANAGER_JWT_KEY='replace-with-strong-32-plus-char-key'
-export SeedUsers__Enabled=true
-export SeedUsers__AdminPassword='replace-with-strong-admin-password'
-export SeedUsers__ManagerPassword='replace-with-strong-manager-password'
+cp .env.example .env
+# edit .env and replace all CHANGE_ME values
 docker compose up -d
+
+# load .env values into current shell for dotnet commands
+set -a
+source .env
+set +a
+
 dotnet restore
 dotnet build
 dotnet ef database update --project TaskManager/TaskManager.csproj
@@ -53,9 +82,12 @@ dotnet run --project TaskManager/TaskManager.csproj
 This repo is configured to use SQL Server in Development:
 
 - `TaskManager/appsettings.Development.json` sets `"UseInMemoryDatabase": false`
-- Connection string targets `localhost,14333`
+- SQL connection string must come from `ConnectionStrings__TaskConnection` (for example via `.env`)
 - JWT key must come from `TASKMANAGER_JWT_KEY` (or `Jwt:Key` secret config)
 - Seed user passwords must be set when `SeedUsers:Enabled=true`
+- You can optionally run the API in Docker too via:
+  - `cp docker-compose.override.example.yml docker-compose.override.yml`
+  - `docker compose --profile api up -d`
 
 ## Temporary in-memory mode (non-persistent)
 
@@ -72,8 +104,9 @@ Data is reset when the process stops.
 
 Security note:
 
-- `appsettings*.json` intentionally contains placeholder secrets.
-- The app will fail fast at startup if JWT key or required seed passwords are still placeholder values.
+- `appsettings*.json` does not store SQL credentials or real secrets.
+- `.env` and `docker-compose.override.yml` are ignored by git to avoid leaking local secrets.
+- The app fails fast at startup if SQL connection string, JWT key, or required seed passwords are missing/placeholder values.
 
 ## Local URLs
 
@@ -95,8 +128,8 @@ The API uses JWT Bearer tokens.
 
 Seeded bootstrap accounts (when seeding is enabled):
 
-- `admin@taskmanager.local` / `Admin@123`
-- `manager@taskmanager.local` / `Manager@123`
+- `admin@taskmanager.local` / value from `SeedUsers__AdminPassword`
+- `manager@taskmanager.local` / value from `SeedUsers__ManagerPassword`
 
 In Swagger:
 

@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local secrets and developer-specific compose overrides
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.render.example
+docker-compose.override.yml

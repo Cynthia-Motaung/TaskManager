@@ -1,0 +1,14 @@
+.git
+.github
+.vs
+**/bin
+**/obj
+**/TestResults
+*.user
+*.suo
+*.rsuser
+.env
+.env.*
+!.env.example
+!.env.production.example
+docker-compose.override.yml

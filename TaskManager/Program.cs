@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TaskManager.Configuration;
@@ -11,6 +12,13 @@ using TaskManager.Services;
 var builder = WebApplication.CreateBuilder(args);
 var isTesting = builder.Environment.IsEnvironment("Testing");
 var useInMemoryDatabase = isTesting || builder.Configuration.GetValue<bool>("UseInMemoryDatabase");
+var taskConnectionString = builder.Configuration.GetConnectionString("TaskConnection");
+
+if (!useInMemoryDatabase && IsMissingOrPlaceholder(taskConnectionString))
+{
+    throw new InvalidOperationException(
+        "SQL connection string is not configured. Set ConnectionStrings__TaskConnection via environment (for example by sourcing .env).");
+}
 
 // Add services to the container.
 builder.Services.AddDbContext<TaskDbContext>(options =>
@@ -21,13 +29,19 @@ builder.Services.AddDbContext<TaskDbContext>(options =>
     }
     else
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("TaskConnection"));
+        options.UseSqlServer(taskConnectionString);
     }
 });
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IPasswordHasher, Pbkdf2PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
     ?? throw new InvalidOperationException("Missing Jwt configuration section.");
@@ -181,11 +195,17 @@ if (app.Environment.IsDevelopment())
 }
 
 // Configure the HTTP request pipeline.
+app.UseForwardedHeaders();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGet("/", () => Results.Redirect("/swagger"));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+app.MapGet(
+    "/",
+    () => app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing")
+        ? Results.Redirect("/swagger")
+        : Results.Ok(new { message = "TaskManager API is running." }));
 app.MapControllers();
 app.Run();
 

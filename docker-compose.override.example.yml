@@ -1,0 +1,41 @@
+# Optional local override.
+# Copy to docker-compose.override.yml only if you want to run the API in Docker too.
+#
+# Usage:
+#   cp docker-compose.override.example.yml docker-compose.override.yml
+#   docker compose --profile api up -d
+#
+# Notes:
+# - The API profile is opt-in, so normal `docker compose up -d` still starts SQL only.
+# - This profile installs dotnet-ef at container start, applies migrations, then runs the API.
+
+services:
+  taskmanager-api:
+    profiles: ["api"]
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    container_name: taskmanager-api
+    working_dir: /src
+    volumes:
+      - ./:/src
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      UseInMemoryDatabase: "false"
+      TASKMANAGER_JWT_KEY: ${TASKMANAGER_JWT_KEY:?Set TASKMANAGER_JWT_KEY in .env}
+      SeedUsers__Enabled: ${SeedUsers__Enabled:-true}
+      SeedUsers__AdminEmail: ${SeedUsers__AdminEmail:-admin@taskmanager.local}
+      SeedUsers__ManagerEmail: ${SeedUsers__ManagerEmail:-manager@taskmanager.local}
+      SeedUsers__AdminPassword: ${SeedUsers__AdminPassword:?Set SeedUsers__AdminPassword in .env}
+      SeedUsers__ManagerPassword: ${SeedUsers__ManagerPassword:?Set SeedUsers__ManagerPassword in .env}
+      ConnectionStrings__TaskConnection: Server=sqlserver,1433;Database=TaskManager;User ID=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=True;
+    command: >
+      sh -c "dotnet tool install --global dotnet-ef --version 10.* >/dev/null 2>&1 || true &&
+             export PATH=$$PATH:/root/.dotnet/tools &&
+             dotnet restore &&
+             dotnet ef database update --project TaskManager/TaskManager.csproj &&
+             dotnet run --no-launch-profile --project TaskManager/TaskManager.csproj --urls http://0.0.0.0:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    ports:
+      - "5131:8080"
