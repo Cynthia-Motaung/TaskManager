@@ -39,6 +39,10 @@ docker-compose.yml
 From repository root:
 
 ```bash
+export TASKMANAGER_JWT_KEY='replace-with-strong-32-plus-char-key'
+export SeedUsers__Enabled=true
+export SeedUsers__AdminPassword='replace-with-strong-admin-password'
+export SeedUsers__ManagerPassword='replace-with-strong-manager-password'
 docker compose up -d
 dotnet restore
 dotnet build
@@ -50,16 +54,26 @@ This repo is configured to use SQL Server in Development:
 
 - `TaskManager/appsettings.Development.json` sets `"UseInMemoryDatabase": false`
 - Connection string targets `localhost,14333`
+- JWT key must come from `TASKMANAGER_JWT_KEY` (or `Jwt:Key` secret config)
+- Seed user passwords must be set when `SeedUsers:Enabled=true`
 
 ## Temporary in-memory mode (non-persistent)
 
 For quick runs without SQL Server:
 
 ```bash
+export TASKMANAGER_JWT_KEY='replace-with-strong-32-plus-char-key'
+export SeedUsers__AdminPassword='replace-with-strong-admin-password'
+export SeedUsers__ManagerPassword='replace-with-strong-manager-password'
 UseInMemoryDatabase=true dotnet run --project TaskManager/TaskManager.csproj
 ```
 
 Data is reset when the process stops.
+
+Security note:
+
+- `appsettings*.json` intentionally contains placeholder secrets.
+- The app will fail fast at startup if JWT key or required seed passwords are still placeholder values.
 
 ## Local URLs
 
@@ -79,7 +93,7 @@ The API uses JWT Bearer tokens.
 - Read endpoints require authentication.
 - Write/delete endpoints require `Manager` or `Admin` role.
 
-Default seeded accounts:
+Seeded bootstrap accounts (when seeding is enabled):
 
 - `admin@taskmanager.local` / `Admin@123`
 - `manager@taskmanager.local` / `Manager@123`
