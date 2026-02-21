@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using TaskManager.DTOs;
 using TaskManager.Mappings;
 using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TaskAssignmentsController : ControllerBase
@@ -51,6 +53,7 @@ namespace TaskManager.Controllers
             return Ok(assignments.Select(ta => ta.ToTaskAssignmentDto()));
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost]
         public async Task<IActionResult> CreateTaskAssignment(TaskAssignmentCreateDto taskAssignmentDto)
         {
@@ -79,6 +82,7 @@ namespace TaskManager.Controllers
             return CreatedAtAction(nameof(GetTaskAssignments), taskAssignment.ToTaskAssignmentDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpDelete("{userId}/{taskId}")]
         public async Task<IActionResult> DeleteTaskAssignment(int userId, int taskId)
         {

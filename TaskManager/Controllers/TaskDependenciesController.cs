@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using TaskManager.DTOs;
 using TaskManager.Mappings;
 using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TaskDependenciesController : ControllerBase
@@ -37,6 +39,7 @@ namespace TaskManager.Controllers
             return dependency == null ? NotFound() : Ok(dependency.ToTaskDependencyDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost]
         public async Task<IActionResult> CreateTaskDependency(TaskDependencyCreateDto taskDependencyDto)
         {
@@ -71,6 +74,7 @@ namespace TaskManager.Controllers
                 taskDependency.ToTaskDependencyDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpDelete("{taskId}/{dependsOnTaskId}")]
         public async Task<IActionResult> DeleteTaskDependency(int taskId, int dependsOnTaskId)
         {

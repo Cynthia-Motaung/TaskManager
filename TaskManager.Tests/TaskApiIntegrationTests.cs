@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -31,8 +32,34 @@ public class TaskApiIntegrationTests : IClassFixture<CustomWebApplicationFactory
     }
 
     [Fact]
+    public async Task Login_WithSeededManager_ReturnsToken()
+    {
+        var loginResponse = await _client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email = "manager@taskmanager.local",
+            password = "Manager@123"
+        });
+
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        var body = await loginResponse.Content.ReadAsStringAsync();
+        using var json = JsonDocument.Parse(body);
+        Assert.False(string.IsNullOrWhiteSpace(json.RootElement.GetProperty("accessToken").GetString()));
+    }
+
+    [Fact]
+    public async Task ProtectedEndpoint_WithoutToken_ReturnsUnauthorized()
+    {
+        _client.DefaultRequestHeaders.Authorization = null;
+        var response = await _client.GetAsync("/api/users");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetUsers_ReturnsOk()
     {
+        await AuthenticateAsManagerAsync();
         var response = await _client.GetAsync("/api/users");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -41,6 +68,7 @@ public class TaskApiIntegrationTests : IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task CreateTask_WithInvalidStatus_ReturnsBadRequest()
     {
+        await AuthenticateAsManagerAsync();
         var payload = new
         {
             title = "Invalid status task",
@@ -57,37 +85,17 @@ public class TaskApiIntegrationTests : IClassFixture<CustomWebApplicationFactory
     }
 
     [Fact]
-    public async Task CreateTask_WithValidPayload_ReturnsCreated()
-    {
-        var payload = new
-        {
-            title = "Integration test task",
-            description = "Valid create path",
-            status = "Pending",
-            priority = "Medium",
-            dueDate = DateTime.UtcNow.AddDays(7),
-            projectId = 1
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/tasks", payload);
-
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-
-        var body = await response.Content.ReadAsStringAsync();
-        using var json = JsonDocument.Parse(body);
-        Assert.True(json.RootElement.GetProperty("id").GetInt32() > 0);
-    }
-
-    [Fact]
     public async Task AllEndpoints_SmokeTest_Workflow_Passes()
     {
+        await AuthenticateAsManagerAsync();
         var unique = Guid.NewGuid().ToString("N")[..8];
 
         // Users
         var userCreateResponse = await _client.PostAsJsonAsync("/api/users", new
         {
             name = $"Workflow User {unique}",
-            email = $"workflow-{unique}@example.com"
+            email = $"workflow-{unique}@example.com",
+            role = "User"
         });
         Assert.Equal(HttpStatusCode.Created, userCreateResponse.StatusCode);
         var userId = await ReadIdAsync(userCreateResponse);
@@ -101,7 +109,8 @@ public class TaskApiIntegrationTests : IClassFixture<CustomWebApplicationFactory
         var userPutResponse = await _client.PutAsJsonAsync($"/api/users/{userId}", new
         {
             name = $"Workflow User Updated {unique}",
-            email = $"workflow-updated-{unique}@example.com"
+            email = $"workflow-updated-{unique}@example.com",
+            role = "User"
         });
         Assert.Equal(HttpStatusCode.NoContent, userPutResponse.StatusCode);
 
@@ -261,5 +270,25 @@ public class TaskApiIntegrationTests : IClassFixture<CustomWebApplicationFactory
         var body = await response.Content.ReadAsStringAsync();
         using var json = JsonDocument.Parse(body);
         return json.RootElement.GetProperty("id").GetInt32();
+    }
+
+    private async Task AuthenticateAsManagerAsync()
+    {
+        var token = await LoginAndGetTokenAsync("manager@taskmanager.local", "Manager@123");
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
+
+    private async Task<string> LoginAndGetTokenAsync(string email, string password)
+    {
+        var loginResponse = await _client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email,
+            password
+        });
+
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        var body = await loginResponse.Content.ReadAsStringAsync();
+        using var json = JsonDocument.Parse(body);
+        return json.RootElement.GetProperty("accessToken").GetString() ?? string.Empty;
     }
 }

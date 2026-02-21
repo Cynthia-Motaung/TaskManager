@@ -2,6 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TaskManager.DTOs;
 
+public static class AppRoles
+{
+    public const string User = "User";
+    public const string Manager = "Manager";
+    public const string Admin = "Admin";
+
+    public static readonly HashSet<string> ValidRoles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        User,
+        Manager,
+        Admin
+    };
+}
+
 public static class TaskFieldRules
 {
     public static readonly HashSet<string> ValidStatuses = new(StringComparer.OrdinalIgnoreCase)
@@ -28,6 +42,12 @@ public class UserCreateDto
 
     [Required, EmailAddress, StringLength(256)]
     public string Email { get; set; } = string.Empty;
+
+    [Required, StringLength(20)]
+    public string Role { get; set; } = AppRoles.User;
+
+    [MinLength(8)]
+    public string? Password { get; set; }
 }
 
 public class UserUpdateDto : UserCreateDto;
@@ -37,6 +57,7 @@ public class UserDto
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public string Role { get; set; } = AppRoles.User;
 }
 
 public class UserTaskSummaryDto
@@ -48,6 +69,37 @@ public class UserTaskSummaryDto
 public class UserDetailsDto : UserDto
 {
     public IReadOnlyCollection<UserTaskSummaryDto> Tasks { get; set; } = Array.Empty<UserTaskSummaryDto>();
+}
+
+public class AuthRegisterDto
+{
+    [Required, StringLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required, EmailAddress, StringLength(256)]
+    public string Email { get; set; } = string.Empty;
+
+    [Required, MinLength(8), StringLength(128)]
+    public string Password { get; set; } = string.Empty;
+}
+
+public class AuthLoginDto
+{
+    [Required, EmailAddress, StringLength(256)]
+    public string Email { get; set; } = string.Empty;
+
+    [Required, MinLength(8), StringLength(128)]
+    public string Password { get; set; } = string.Empty;
+}
+
+public class AuthResponseDto
+{
+    public int UserId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Role { get; set; } = AppRoles.User;
+    public string AccessToken { get; set; } = string.Empty;
+    public DateTime ExpiresAtUtc { get; set; }
 }
 
 public class ProjectCreateDto

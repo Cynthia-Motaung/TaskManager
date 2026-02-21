@@ -13,6 +13,12 @@ namespace TaskManager.Models
         [Required]
         public string? Email { get; set; }
 
+        [Required]
+        public string Role { get; set; } = "User";
+
+        public byte[]? PasswordHash { get; set; }
+        public byte[]? PasswordSalt { get; set; }
+
         public ICollection<TaskAssignment> TaskAssignments { get; set; } = new List<TaskAssignment>();
     }
 }

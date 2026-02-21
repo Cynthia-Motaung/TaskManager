@@ -10,7 +10,8 @@ public static class DtoMappings
         {
             Id = user.Id,
             Name = user.Name ?? string.Empty,
-            Email = user.Email ?? string.Empty
+            Email = user.Email ?? string.Empty,
+            Role = user.Role
         };
 
     public static UserDetailsDto ToUserDetailsDto(this User user) =>
@@ -19,14 +20,15 @@ public static class DtoMappings
             Id = user.Id,
             Name = user.Name ?? string.Empty,
             Email = user.Email ?? string.Empty,
-            Tasks = user.TaskAssignments?
+            Role = user.Role,
+            Tasks = user.TaskAssignments
                 .Where(a => a.TaskItem is not null)
                 .Select(a => new UserTaskSummaryDto
                 {
                     TaskItemId = a.TaskItemId,
                     Title = a.TaskItem!.Title ?? string.Empty
                 })
-                .ToArray() ?? Array.Empty<UserTaskSummaryDto>()
+                .ToArray()
         };
 
     public static ProjectDto ToProjectDto(this Project project) =>
@@ -45,7 +47,7 @@ public static class DtoMappings
             Name = project.Name ?? string.Empty,
             Description = project.Description,
             CreatedAt = project.CreatedAt,
-            Tasks = project.Tasks?
+            Tasks = project.Tasks
                 .Select(t => new ProjectTaskSummaryDto
                 {
                     Id = t.Id,
@@ -53,7 +55,7 @@ public static class DtoMappings
                     Status = t.Status,
                     Priority = t.Priority
                 })
-                .ToArray() ?? Array.Empty<ProjectTaskSummaryDto>()
+                .ToArray()
         };
 
     public static TaskDto ToTaskDto(this TaskItem task) =>
@@ -66,19 +68,19 @@ public static class DtoMappings
             Priority = task.Priority,
             DueDate = task.DueDate,
             ProjectId = task.ProjectId,
-            Assignments = task.TaskAssignments?
+            Assignments = task.TaskAssignments
                 .Select(a => new TaskAssignmentSummaryDto
                 {
                     UserId = a.UserId,
                     UserName = a.User?.Name ?? string.Empty
                 })
-                .ToArray() ?? Array.Empty<TaskAssignmentSummaryDto>(),
-            Dependencies = task.Dependencies?
+                .ToArray(),
+            Dependencies = task.Dependencies
                 .Select(d => new TaskDependencySummaryDto
                 {
                     DependsOnTaskId = d.DependsOnTaskId
                 })
-                .ToArray() ?? Array.Empty<TaskDependencySummaryDto>()
+                .ToArray()
         };
 
     public static TaskAssignmentDto ToTaskAssignmentDto(this TaskAssignment assignment) =>

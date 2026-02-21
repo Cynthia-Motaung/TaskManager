@@ -49,9 +49,27 @@ namespace TaskManager.Models
 
             //Seed initial data for Users
             modelBuilder.Entity<User>().HasData(
-                new User { Id = 1, Name = "Alice Johnson", Email = "alice@example.com" },
-                new User { Id = 2, Name = "Bob Smith", Email = "bob@example.com" },
-                new User { Id = 3, Name = "Charlie Lee", Email = "charlie@example.com" }
+                new User { Id = 1, Name = "Alice Johnson", Email = "alice@example.com", Role = "User" },
+                new User { Id = 2, Name = "Bob Smith", Email = "bob@example.com", Role = "User" },
+                new User { Id = 3, Name = "Charlie Lee", Email = "charlie@example.com", Role = "User" },
+                new User
+                {
+                    Id = 4,
+                    Name = "System Admin",
+                    Email = "admin@taskmanager.local",
+                    Role = "Admin",
+                    PasswordSalt = new byte[] { 11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132, 143, 154, 165, 176 },
+                    PasswordHash = new byte[] { 225, 133, 129, 224, 237, 99, 105, 218, 18, 122, 242, 74, 140, 236, 50, 125, 236, 222, 55, 162, 86, 42, 229, 189, 130, 255, 193, 18, 175, 123, 137, 129 }
+                },
+                new User
+                {
+                    Id = 5,
+                    Name = "Project Manager",
+                    Email = "manager@taskmanager.local",
+                    Role = "Manager",
+                    PasswordSalt = new byte[] { 176, 165, 154, 143, 132, 121, 110, 99, 88, 77, 66, 55, 44, 33, 22, 11 },
+                    PasswordHash = new byte[] { 7, 218, 90, 57, 224, 37, 143, 86, 4, 105, 85, 208, 199, 83, 93, 4, 125, 96, 71, 19, 114, 224, 21, 4, 80, 238, 217, 110, 175, 198, 224, 113 }
+                }
             );
 
             //Seed initial data  for Projects

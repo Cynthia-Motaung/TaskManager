@@ -67,6 +67,29 @@ Data is reset when the process stops.
 - `https://localhost:7024`
 - Root redirects to Swagger: `http://localhost:5131/` -> `/swagger`
 
+## Authentication and authorization
+
+The API uses JWT Bearer tokens.
+
+- Public auth endpoints:
+  - `POST /api/auth/register`
+  - `POST /api/auth/login`
+- Authenticated endpoint:
+  - `GET /api/auth/me`
+- Read endpoints require authentication.
+- Write/delete endpoints require `Manager` or `Admin` role.
+
+Default seeded accounts:
+
+- `admin@taskmanager.local` / `Admin@123`
+- `manager@taskmanager.local` / `Manager@123`
+
+In Swagger:
+
+1. Call `POST /api/auth/login`.
+2. Copy `accessToken`.
+3. Click **Authorize** and enter `Bearer <token>`.
+
 ## API endpoints
 
 ### Users
@@ -127,6 +150,7 @@ Data is reset when the process stops.
 - DTO-based request/response contracts
 - Task status allowed: `Pending`, `InProgress`, `Done`, `Blocked`
 - Task priority allowed: `Low`, `Medium`, `High`, `Critical`
+- User roles allowed: `User`, `Manager`, `Admin`
 - Global exception middleware returns `application/problem+json`
 
 ## Tests
@@ -137,4 +161,8 @@ Run integration tests:
 dotnet test TaskManager.Tests/TaskManager.Tests.csproj
 ```
 
-Current integration coverage includes a full workflow smoke test across all controllers and key endpoints.
+Current integration coverage includes:
+
+- JWT login and protected endpoint access
+- Unauthorized access checks for protected APIs
+- Full authenticated workflow smoke test across all controllers and key endpoints

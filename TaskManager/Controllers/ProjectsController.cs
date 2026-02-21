@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.DTOs;
 using TaskManager.Mappings;
@@ -6,6 +7,7 @@ using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ProjectsController : ControllerBase
@@ -34,6 +36,7 @@ namespace TaskManager.Controllers
             return project == null ? NotFound() : Ok(project.ToProjectDetailsDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost]
         public async Task<IActionResult> CreateProject(ProjectCreateDto projectDto)
         {
@@ -49,6 +52,7 @@ namespace TaskManager.Controllers
             return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project.ToProjectDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProject(int id, ProjectUpdateDto projectDto)
         {
@@ -61,6 +65,7 @@ namespace TaskManager.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(int id)
         {
@@ -72,4 +77,3 @@ namespace TaskManager.Controllers
         }
     }
 }
-

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.DTOs;
 using TaskManager.Mappings;
@@ -6,6 +7,7 @@ using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/tasks/{taskId}/[controller]")]
     public class AttachmentsController : ControllerBase
@@ -23,6 +25,7 @@ namespace TaskManager.Controllers
             return Ok(attachments.Select(a => a.ToAttachmentDto()));
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost]
         public async Task<IActionResult> AddAttachment(int taskId, AttachmentCreateDto attachmentDto)
         {
@@ -42,6 +45,7 @@ namespace TaskManager.Controllers
             return CreatedAtAction(nameof(GetAttachments), new { taskId = taskId }, attachment.ToAttachmentDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpDelete("{attachmentId}")]
         public async Task<IActionResult> DeleteAttachment(int taskId, int attachmentId)
         {
@@ -54,4 +58,3 @@ namespace TaskManager.Controllers
         }
     }
 }
-

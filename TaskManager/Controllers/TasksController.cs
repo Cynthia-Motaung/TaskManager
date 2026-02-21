@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.DTOs;
@@ -8,6 +9,7 @@ using TaskManager.Models;
 
 namespace TaskManager.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -41,6 +43,7 @@ namespace TaskManager.Controllers
             return task == null ? NotFound() : Ok(task.ToTaskDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost]
         public async Task<IActionResult> CreateTask(TaskCreateDto taskDto)
         {
@@ -69,6 +72,7 @@ namespace TaskManager.Controllers
             return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task.ToTaskDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, TaskUpdateDto taskDto)
         {
@@ -96,6 +100,7 @@ namespace TaskManager.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
@@ -106,6 +111,7 @@ namespace TaskManager.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost("{id}/assign/{userId}")]
         public async Task<IActionResult> AssignUser(int id, int userId)
         {

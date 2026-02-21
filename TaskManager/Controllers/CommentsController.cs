@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.DTOs;
 using TaskManager.Mappings;
@@ -7,6 +8,7 @@ using TaskManager.Models;
 
  namespace TaskManager.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/tasks/{taskId}/[controller]")]
     public class CommentsController : ControllerBase
@@ -25,6 +27,7 @@ using TaskManager.Models;
             return Ok(comments.Select(c => c.ToCommentDto()));
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpPost]
         public async Task<IActionResult> AddComment(int taskId, CommentCreateDto commentDto)
         {
@@ -57,6 +60,7 @@ using TaskManager.Models;
             return CreatedAtAction(nameof(GetComments), new { taskId = taskId }, createdComment.ToCommentDto());
         }
 
+        [Authorize(Roles = $"{AppRoles.Manager},{AppRoles.Admin}")]
         [HttpDelete("{commentId}")]
         public async Task<IActionResult> DeleteComment(int taskId, int commentId)
         {
